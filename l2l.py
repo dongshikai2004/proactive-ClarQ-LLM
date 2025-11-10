@@ -3,7 +3,7 @@ from agents.provider_agent import helpers as general_provider
 from agents.multi_info_provider_agent import helpers_m as multi_info_provider
 from ALL_KEYS import *
 from utils.data_loader import *
-from utils.llm import ChatGPT,QianFan,LLAMA,AWSBedrockLLAMA
+from utils.llm import ChatGPT,QianFan,LLAMA,AWSBedrockLLAMA,Openrouter,Gemini
 import argparse
 
 
@@ -90,6 +90,10 @@ def test_helper(task_data_path, provider_constructor, provider_llm):
 
 
 if __name__ == "__main__":
+    import os 
+    PROXY = "http://127.0.0.1:10808"
+    os.environ["HTTP_PROXY"] = PROXY
+    os.environ["HTTPS_PROXY"] = PROXY
     parser = argparse.ArgumentParser(description='Run language model evaluation.')
     parser.add_argument('--seeker_agent_llm', type=str, default='gpt4o')
     parser.add_argument('--provider_agent_llm', type=str, default='gpt4o')
@@ -127,7 +131,14 @@ if __name__ == "__main__":
     elif args.seeker_agent_llm  == 'llama3.1-405B':
         player_llm = AWSBedrockLLAMA("llama3.1-405B", 'log/llm_player_cache_llama3.1-405B.pkl')
         output_path = "results/l2l_llama3.1-405B.{}.{}.json".format(mode,language)
+    elif "qwen" in args.seeker_agent_llm:
+        player_llm = Openrouter("qwen/"+args.seeker_agent_llm,'log/llm_player_cache_{}.pkl'.format(args.seeker_agent_llm))
+        output_path = "results/l2l_{}.{}.{}.json".format(args.seeker_agent_llm,mode,language)
+    elif "gemini" in args.seeker_agent_llm:
+        player_llm = Gemini(args.seeker_agent_llm,'log/llm_player_cache_{}.pkl'.format(args.seeker_agent_llm))
+        output_path = "results/l2l_{}.{}.{}.json".format(args.seeker_agent_llm,mode,language)
     else:
+        print(args.seeker_agent_llm)
         player_llm = ChatGPT("gpt-3.5-turbo-0125", 'log/gpt3_plyaer_cache.pkl')
         output_path = "results/l2l_gpt3.5.{}.{}.json".format(mode,language)
 

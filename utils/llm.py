@@ -225,7 +225,74 @@ class ChatGPT(LLM):
         
         return completion.choices[0].message.content, message
 
+class Gemini(ChatGPT):
+    def __init__(self, name, cache=None):
+        super().__init__(name, cache)
+        name  = name.lower()
+        self.model_name = name
+        self.client = OpenAI(api_key=os.environ["Gemini_API_KEY"],base_url="https://generativelanguage.googleapis.com/v1beta/openai/")
+    def request(self, prompt, stop, **kwargs):
+        message = [{
+                    "role": "user",
+                    "content": prompt
+                }]
+        if 'previous_message' in kwargs and kwargs['previous_message']:
+            message = kwargs['previous_message'].extend(message)
+            message = kwargs['previous_message']
+        json_format = True if 'json_format' in kwargs and kwargs['json_format'] else False
 
+        response = self.from_cache(message)
+        if response:
+            message.append({"role": "assistant", "content": response})
+            return response, message
+        
+        try:
+            # Prepare the arguments for the API call
+            api_kwargs = {
+                "model": self.model_name,
+                "temperature": 0,
+                "messages": message,
+            }
+
+            # Only include the 'stop' parameter if it is not None
+            if stop is not None:
+                api_kwargs["stop"] = stop
+
+            if json_format:
+                api_kwargs["response_format"] = {"type": "json_object"}
+
+            completion = self.client.chat.completions.create(**api_kwargs)
+            time.sleep(0.5)
+        except Exception as e: # It's good practice to catch the specific exception
+            print(f"An error occurred: {e}")
+            time.sleep(5)
+            # It's also a good idea to retry with the same logic
+            api_kwargs = {
+                "model": self.model_name,
+                "temperature": 0,
+                "messages": message,
+            }
+            if stop is not None:
+                api_kwargs["stop"] = stop
+            if json_format:
+                api_kwargs["response_format"] = {"type": "json_object"}
+                
+            completion = self.client.chat.completions.create(**api_kwargs)
+            time.sleep(0.5)
+            
+        super().log(message, completion.choices[0].message.content, model=completion.model, system_fingerprint = completion.system_fingerprint, usage = [completion.usage.prompt_tokens, completion.usage.completion_tokens, completion.usage.total_tokens])
+        self.save_to_cache(message, completion.choices[0].message.content)
+        
+        message.append({"role": "assistant", "content": completion.choices[0].message.content})
+        
+        return completion.choices[0].message.content, message
+
+class Openrouter(ChatGPT):
+    def __init__(self, name, cache=None):
+        super().__init__(name, cache)
+        self.model_name = name
+        self.client = OpenAI(api_key=os.environ["OPENROUTER_API_KEY"],base_url="https://openrouter.ai/api/v1")
+        
 
 class QianFan(LLM):
     def __init__(self, name, cache = None) -> None:

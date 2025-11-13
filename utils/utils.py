@@ -16,7 +16,7 @@ def detect_language(text):
         return "Chinese"
 
 def get_gold_structure(one_type, bjx_path):
-    with open(bjx_path, 'r') as f:
+    with open(bjx_path, 'r',encoding='utf-8') as f:
         data2 = json.load(f)
     new_t = []
     for (j,d),d2 in zip(enumerate(one_type), data2):    

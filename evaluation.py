@@ -49,6 +49,7 @@ def evaluate_one_multi(gold, gold_explain, predict, llm):
         gold = [g.lower() for g in gold]
         predict = [g.lower() for g in predict]
     if easy_check:
+        # print(1)
         return 1
     else:
         easy_check = True
@@ -58,11 +59,14 @@ def evaluate_one_multi(gold, gold_explain, predict, llm):
                 break
         
     if easy_check:
+        # print(2)
         return 1
     else:
         gold_cleaned = [sentence.rstrip('，。？！,.?!') for sentence in gold]
         predict_cleaned = [sentence.rstrip('，。？！,.?!') for sentence in predict]
-
+        # print("+++++++++++++++++++++++++++++++++++")
+        # print(gold_cleaned)
+        # print(predict_cleaned)
         gold_diff = []
         predict_diff = []
 
@@ -70,7 +74,7 @@ def evaluate_one_multi(gold, gold_explain, predict, llm):
         contained_gold_explain = dict()
         for p in predict_cleaned:
             for g in gold_cleaned:
-                if g in p:
+                if g in p or p in g:
                     contained_gold.add(g)
                     contained_gold.add(p)
         for i_g, g in enumerate(gold_cleaned):
@@ -79,10 +83,12 @@ def evaluate_one_multi(gold, gold_explain, predict, llm):
         gold_diff = [g for g in gold_cleaned if g not in contained_gold]
         predict_diff = [p for p in predict_cleaned if p not in contained_gold]
         glod_explain_diff = [contained_gold_explain[g] for g in gold_diff]
-
+        # print(gold_diff)
         if not gold_diff:
+            # print(3)
             return 1
         elif not predict_diff:
+            # print(4)
             return 0
         
         for gd, gde in zip(gold_diff, glod_explain_diff):
@@ -96,8 +102,9 @@ def evaluate_one_multi(gold, gold_explain, predict, llm):
                 break
 
         if 'match' in result_dict and result_dict['match']:
+            # print(5)
             return 1
-        
+    # print(6)
     return 0
 
 
@@ -108,7 +115,7 @@ def evaluate_l2l_doc():
     if llm_name == 'llama3.1-405b':
         llm = AWSBedrockLLAMA("llama3.1-405b", 'log/llama3.1_evaluator_cache.pkl')
     elif "gemini" in llm_name :
-        llm = Gemini(llm,'log/llm_evaluator_cache_{}.pkl'.format(llm))
+        llm = Gemini(llm_name,'log/llm_evaluator_cache_{}.pkl'.format(llm_name))
     else:
         llm = ChatGPT("gpt-4o-2024-05-13", 'log/llm_evaluator_cache.pkl')
 
@@ -149,7 +156,7 @@ def evaluate_l2l_doc():
                     ARL_evaluation_results[i][j].append(sum([s.count(' ') for s in seeker_reponse])/len(seeker_reponse))
                 else:
                     ARL_evaluation_results[i][j].append(sum([len(s) for s in seeker_reponse])/len(seeker_reponse))
-
+            
         print(evaluate_results[-1])
     sum_arrays = sum(sum(sum(inner) for inner in outer) for outer in evaluate_results)
     print("Success Rate: {}".format(sum_arrays/(10*len(evaluation_set))))
@@ -164,4 +171,8 @@ def evaluate_l2l_doc():
 
 
 if __name__ == "__main__":
+    import os 
+    PROXY = "http://127.0.0.1:10808"
+    os.environ["HTTP_PROXY"] = PROXY
+    os.environ["HTTPS_PROXY"] = PROXY
     evaluate_l2l_doc()

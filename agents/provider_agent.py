@@ -122,7 +122,21 @@ class helpers(helper):
 
     def prompt_pure(self, prompt):
         resonse,_ =  self.llm.request(prompt, None, json_format=True)
-        return json.loads(resonse)
+        import re
+        resonse = re.sub(r'^```json\s*|\s*```$', '', resonse, flags=re.MULTILINE).strip()
+        cleaned_resonse = resonse.strip()
+        cleaned_resonse = cleaned_resonse.removeprefix('```json')
+        cleaned_resonse = cleaned_resonse.removeprefix('```')
+        cleaned_resonse = cleaned_resonse.removesuffix('```')
+        cleaned_resonse = cleaned_resonse.strip()
+        cleaned_resonse = re.sub(r'True', 'true', cleaned_resonse)
+        cleaned_resonse = re.sub(r'False', 'false', cleaned_resonse)
+        # print("--------------------------")
+        # print(cleaned_resonse)
+        # print("--------------------------")
+        
+        return json.loads(cleaned_resonse)
+        # return json.loads(resonse)
 
 
     def data2prompt_0(self, previous_content):

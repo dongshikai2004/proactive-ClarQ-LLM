@@ -10,6 +10,7 @@ add API_KEYS in `ALL_KEYS`
 ```python
 os.environ["GEMINI_API_KEY"] = ""
 os.environ["OPENROUTER_API_KEY"] = ""
+os.environ["DASHSCOPE_API_KEY"] = ""
 ```
 
 ## run
@@ -17,12 +18,12 @@ os.environ["OPENROUTER_API_KEY"] = ""
 ### create conversations
 
 ```bash
-python l2l.py --seeker_agent_llm qwen3-8b --provider_agent_llm gemini-2.5-flash --task_data_path data/English 
+python l2l.py --seeker_agent_llm qwen3-8b --provider_agent_llm gemini-2.5-flash-lite --task_data_path data/English
 ```
 
 ### evaluate
 
 ```bash
-python evaluation.py gemini-2.5-flash results/l2l_qwen3-8b.Chat.En.json
+python evaluation.py gemini-2.5-flash results/l2l_qwen3-8b.Comp.En.json
 ```
 

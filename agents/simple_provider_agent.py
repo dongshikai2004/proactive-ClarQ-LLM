@@ -161,7 +161,7 @@ class helper:
             if '再见' == conv[-1] or '再见！' in conv[-1] or '再见。' in conv[-1] or '再见，' in conv[-1] or '再见!' in conv[-1] or '再见.' in conv[-1] or '再见,' in conv[-1] or '再见Jax' in conv[-1] or '，再见' in conv[-1] or '。再见' in conv[-1] or '.再见' in conv[-1] or ',再见' in conv[-1] or ' 再见' in conv[-1] or '再见 ' in conv[-1] or '\n再见' in conv[-1] or '再见\n' in conv[-1]:
                 return True
         else:
-            if 'Goodbye' == conv[-1]  or 'Goodbye!' in conv[-1] or 'Goodbye.' in conv[-1] or 'Goodbye,' in conv[-1] or 'Goodbye Jax' in conv[-1] or ', Goodbye' in conv[-1] or '. Goodbye' in conv[-1] or '.Goodbye' in conv[-1] or ',Goodbye' in conv[-1] or ' Goodbye' in conv[-1] or 'Goodbye ' in conv[-1] or '\nGoodbye' in conv[-1] or 'Goodbye\n' in conv[-1]:
+            if 'Goodbye' == conv[-1]  or 'Goodbye!' in conv[-1] or 'Goodbye.' in conv[-1] or 'Goodbye,' in conv[-1] or 'Goodbye Jax' in conv[-1] or ', Goodbye' in conv[-1] or '. Goodbye' in conv[-1] or '.Goodbye' in conv[-1] or ',Goodbye' in conv[-1] or ' Goodbye' in conv[-1] or 'Goodbye ' in conv[-1] or '\nGoodbye' in conv[-1] or 'Goodbye\n' in conv[-1] or 'goodbye' in conv[-1]:
                 return True
         return False
 

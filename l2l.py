@@ -5,7 +5,7 @@ from ALL_KEYS import *
 from utils.data_loader import *
 from utils.llm import ChatGPT,QianFan,LLAMA,AWSBedrockLLAMA,Openrouter,Gemini
 import argparse
-
+import re
 
 def evaluate_player(task_data_path, output_path, player_llm, player_chat_mode, provider_constructor, provider_llm):
     all_conv = data_combination(read_path(task_data_path))
@@ -14,6 +14,7 @@ def evaluate_player(task_data_path, output_path, player_llm, player_chat_mode, p
 
     for i,one_type in enumerate(all_conv):
         if i not in evaluation_set:
+            evaluate_results.append([])
             continue
         evaluate_results.append([])
         for j,conv in enumerate(one_type):
@@ -25,22 +26,33 @@ def evaluate_player(task_data_path, output_path, player_llm, player_chat_mode, p
             h = provider_constructor(gold_r, conv['background_splitted'], conv['gold_structure'], conv, provider_llm)
             p = player(conv['background_splitted'], player_llm, player_chat_mode)
             l2l_conv = []
+            tt=0
             while True:
+                tt+=2
                 l2l_conv.append(h.generate_reponse(l2l_conv))
+                print(l2l_conv[-1])
+                if not l2l_conv[-1]:
+                    return -1
+                print('---------------------------')
                 l2l_conv.append(p.generate_reponse(l2l_conv))
+                print(l2l_conv[-1])
+                if not l2l_conv[-1]:
+                    return -1
+                print('===========================')
                 if h.is_conv_end(l2l_conv) or len(l2l_conv) > 22:
                     break
+            cleanl=[]
             for c in l2l_conv:
-                print(c)
-                print()
-            conv['l2l'][0] = l2l_conv
-            print()
-            print()
-            print()
+                d=re.sub(r'\*\*|\n', '', c)
+                cleanl.append(d)
+            print(tt)
+            conv['l2l'][0] = cleanl
+            # break
         if i == 26 - 1:
             break
-    with open(output_path, "w") as json_file:
+    with open(output_path, "w",encoding='utf-8') as json_file:
         json.dump(all_conv, json_file, ensure_ascii=False, indent=2)
+    return 0
 
     
 
@@ -132,7 +144,7 @@ if __name__ == "__main__":
         player_llm = AWSBedrockLLAMA("llama3.1-405B", 'log/llm_player_cache_llama3.1-405B.pkl')
         output_path = "results/l2l_llama3.1-405B.{}.{}.json".format(mode,language)
     elif "qwen" in args.seeker_agent_llm:
-        player_llm = Openrouter("qwen/"+args.seeker_agent_llm,'log/llm_player_cache_{}.pkl'.format(args.seeker_agent_llm))
+        player_llm = Openrouter(args.seeker_agent_llm,'log/llm_player_cache_{}.pkl'.format(args.seeker_agent_llm))
         output_path = "results/l2l_{}.{}.{}.json".format(args.seeker_agent_llm,mode,language)
     elif "gemini" in args.seeker_agent_llm:
         player_llm = Gemini(args.seeker_agent_llm,'log/llm_player_cache_{}.pkl'.format(args.seeker_agent_llm))
@@ -141,7 +153,9 @@ if __name__ == "__main__":
         print(args.seeker_agent_llm)
         player_llm = ChatGPT("gpt-3.5-turbo-0125", 'log/gpt3_plyaer_cache.pkl')
         output_path = "results/l2l_gpt3.5.{}.{}.json".format(mode,language)
-
-    evaluate_player(task_data_path, output_path, player_llm, player_chat_mode,provider_agent_constructor,args.provider_agent_llm)
+    t=-1
+    while t==-1:
+        t=evaluate_player(task_data_path, output_path, player_llm, player_chat_mode,provider_agent_constructor,args.provider_agent_llm)
+    
 
 

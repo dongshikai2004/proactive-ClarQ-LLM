@@ -23,9 +23,6 @@ class LLM:
             else:
                 self.cache = OrderedDict()
 
-
-
-
     def extract_json_string(self, input_string):
         def process_colons_string(input_string, colon_positions):
             def find_string_bounds(s, start_pos, next_pos=None):
@@ -204,9 +201,11 @@ class ChatGPT(LLM):
                 messages=message,
                 stop = stop,
                 seed = 8848,
+                extra_body={"enable_thinking": False},
                 **({"response_format": {"type": "json_object"}} if json_format else {})
             )
-            time.sleep(0.5)
+            print("done")
+            # time.sleep(0.5)
         except:
             time.sleep(5)
             completion = self.client.chat.completions.create(
@@ -215,6 +214,7 @@ class ChatGPT(LLM):
                 messages=message,
                 stop = stop,
                 seed = 8848,
+                extra_body={"enable_thinking": False},
                 **({"response_format": {"type": "json_object"}} if json_format else {})
             )
             time.sleep(0.5)
@@ -222,7 +222,6 @@ class ChatGPT(LLM):
         self.save_to_cache(message, completion.choices[0].message.content)
         
         message.append({"role": "assistant", "content": completion.choices[0].message.content})
-        
         return completion.choices[0].message.content, message
 
 class Gemini(ChatGPT):
@@ -242,7 +241,7 @@ class Gemini(ChatGPT):
         json_format = True if 'json_format' in kwargs and kwargs['json_format'] else False
 
         response = self.from_cache(message)
-        if response:
+        if response :
             message.append({"role": "assistant", "content": response})
             return response, message
         
@@ -262,7 +261,7 @@ class Gemini(ChatGPT):
                 api_kwargs["response_format"] = {"type": "json_object"}
 
             completion = self.client.chat.completions.create(**api_kwargs)
-            time.sleep(0.5)
+            # time.sleep(0.5)
         except Exception as e: # It's good practice to catch the specific exception
             print(f"An error occurred: {e}")
             time.sleep(5)
@@ -284,14 +283,15 @@ class Gemini(ChatGPT):
         self.save_to_cache(message, completion.choices[0].message.content)
         
         message.append({"role": "assistant", "content": completion.choices[0].message.content})
-        
         return completion.choices[0].message.content, message
 
 class Openrouter(ChatGPT):
     def __init__(self, name, cache=None):
         super().__init__(name, cache)
         self.model_name = name
-        self.client = OpenAI(api_key=os.environ["OPENROUTER_API_KEY"],base_url="https://openrouter.ai/api/v1")
+        # self.client = OpenAI(api_key=os.environ["OPENROUTER_API_KEY"],base_url="https://openrouter.ai/api/v1")
+        self.client = OpenAI(api_key=os.environ["DASHSCOPE_API_KEY"],base_url="https://dashscope.aliyuncs.com/compatible-mode/v1")
+        
         
 
 class QianFan(LLM):

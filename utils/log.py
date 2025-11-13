@@ -6,7 +6,7 @@ logging.basicConfig(filename='log/'+str(datetime.now().date())+'.log', level=log
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 def readable_log(message):
-    with open('log/'+str(datetime.now().date())+'.readable', 'a') as file:
+    with open('log/'+str(datetime.now().date())+'.readable', 'a',encoding='utf-8') as file:
         file.write('========================\n')
         file.write('========================\n')
         file.write('========================\n')

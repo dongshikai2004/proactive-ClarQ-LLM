@@ -41,7 +41,7 @@ def read_path(name):
     for t in types:
         t = t.replace(' ','_') + '.json'
         json_path = os.path.join(dir_path,t) 
-        with open(json_path, 'r') as f:
+        with open(json_path, 'r',encoding='utf-8') as f:
             all_data.append(json.load(f)) 
     return all_data
 
